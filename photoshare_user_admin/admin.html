@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PhotoShare — Admin View</title>
+  <style>
+    body{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial; background:#f3f4f6; margin:0; padding:24px;}
+    .panel{max-width:900px; margin:0 auto; background:#fff; border:1px solid #e6e6e6; padding:18px; border-radius:10px;}
+    h2{margin-top:0;}
+    .list{font-family:monospace; background:#fafafa; padding:12px; border-radius:8px; max-height:420px; overflow:auto; border:1px dashed #eee;}
+    .row{padding:8px 10px; border-bottom:1px solid #f0f0f0;}
+    .meta{color:#666; font-size:13px;}
+    button{padding:8px 10px; border-radius:6px; border:none; cursor:pointer;}
+    .primary{background:#0095f6; color:#fff; font-weight:700;}
+    .danger{background:#f2f2f2; border:1px solid #ddd;}
+    .note{color:#666; font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h2>Simulation Admin View</h2>
+    <div class="note">This admin page reads simulated captures stored locally by the demo login page. No data has left your browser.</div>
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <button class="primary" id="refreshBtn">Refresh</button>
+      <button class="danger" id="clearBtn">Clear Stored Entries</button>
+      <a href="index.html" style="margin-left:auto; align-self:center;">Open user login</a>
+    </div>
+
+    <div style="margin-top:12px;" id="count"></div>
+    <div class="list" id="captures">
+      <!-- entries appear here -->
+    </div>
+  </div>
+
+  <script>
+    const key = 'photoshare_sim_captures_v1';
+    function loadCaptures() {
+      const raw = localStorage.getItem(key);
+      const arr = raw ? JSON.parse(raw) : [];
+      const container = document.getElementById('captures');
+      container.innerHTML = '';
+      if (!arr.length) {
+        container.textContent = 'No captures yet — demo only.';
+        document.getElementById('count').textContent = '';
+        return;
+      }
+      document.getElementById('count').textContent = arr.length + ' simulated capture(s)';
+      arr.forEach((e, i) => {
+        const div = document.createElement('div');
+        div.className = 'row';
+        div.innerHTML = '<div><strong>username:</strong> ' + escapeHtml(e.username) + '</div>' +
+                        '<div><strong>password:</strong> ' + escapeHtml(e.password) + '</div>' +
+                        '<div class="meta">captured at: ' + (e.ts || '') + '</div>';
+        container.appendChild(div);
+      });
+    }
+
+    function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+    document.getElementById('refreshBtn').addEventListener('click', loadCaptures);
+    document.getElementById('clearBtn').addEventListener('click', function(){
+      if (confirm('Clear stored demo entries from your browser? This cannot be undone.')) {
+        localStorage.removeItem(key);
+        loadCaptures();
+      }
+    });
+
+    // load on open
+    loadCaptures();
+  </script>
+</body>
+</html>
